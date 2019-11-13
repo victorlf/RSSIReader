@@ -1,0 +1,32 @@
+<!--This is a linear layout with a textview which is used to display the device name in one row of
+the list row.-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="5dp"
+        android:textSize="20dp"
+        android:textColor="#0040FF"
+        android:text="dsdsd" />
+    <TextView
+        android:id="@+id/bdaddr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:textSize="12dp"
+        android:textColor="#0040FF"
+        android:text="sdsdsd" />
+    <TextView
+        android:id="@+id/bdrssi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:textSize="10dp"
+        android:textColor="#0040FF"
+        android:text="sdsds" />
+</LinearLayout>
