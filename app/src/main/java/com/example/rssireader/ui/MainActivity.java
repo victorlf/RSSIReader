@@ -42,8 +42,8 @@ import java.util.IdentityHashMap;
 * Limpar enxugar o código ao máximo;(Check)
 * Replicar o retângulo que mudar de cor do exemplo;(Check)
 * Ler sem estar conectado;(Check)
-* Ler scanning continuamente; (Por equanto apenas aumentei o tempo de scanning)
-* Atualizar rssi com timeStamp() (timer() schedule->updateRssi);
+* Ler scanning continuamente; (Check)
+* Atualizar rssi com timeStamp() (timer() schedule->updateRssi); (Está contanto o timestamp)
 * Fazer gráfico;
 * * */
 
@@ -309,6 +309,13 @@ public class MainActivity extends AppCompatActivity implements ScanResultsConsum
             ble_scanner.stopScanning();
         }
     }
+
+    /*public void onScan(View view) {
+        Intent intent = new Intent(MainActivity.this,
+                GraphViewActivity.class);
+        startActivity(intent);
+    }*/
+
 
     // Handles requesting permission to perform scanning from the user
     private void requestLocationPermission() {

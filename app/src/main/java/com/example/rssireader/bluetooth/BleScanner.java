@@ -12,6 +12,8 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import com.example.rssireader.Constants;
+import com.jjoe64.graphview.series.DataPoint;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +26,9 @@ public class BleScanner {
     private Context context;
     private boolean scanning=false;
     private String device_name_start="";
+
+    // Graph
+    private Runnable mTimerGraph;
 
     // Class Constructor and Checking the Status of the Bluetooth Adapter
     public BleScanner(Context context) {
@@ -84,7 +89,13 @@ public class BleScanner {
 
     // Scanning used in Peripherical Control Activity
     // Here we don't want to stop the scanning adn want to pass a Address for filtering
-    public void startScanningNoStop(final ScanResultsConsumer scan_results_consumer, final String filter_by_bdaddress ) {
+    public void startScanningNoStop(final ScanResultsConsumer scan_results_consumer, final String filter_by_bdaddress){//, final long
+            //stop_after_ms ) {
+
+        //mTimerGraph = new Runnable() {
+
+            //@Override
+            //public void run() {
         if (scanning) {
             Log.d(Constants.TAG, "Already scanning so ignoring startScanning request");
             return;
@@ -93,8 +104,9 @@ public class BleScanner {
             scanner = bluetooth_adapter.getBluetoothLeScanner();
             Log.d(Constants.TAG, "Created BluetoothScanner object");
         }
-        this.scan_results_consumer = scan_results_consumer;
-        Log.d(Constants.TAG,"Scanning");
+
+        BleScanner.this.scan_results_consumer = scan_results_consumer;
+        Log.d(Constants.TAG, "Scanning");
         List<ScanFilter> filters;
         filters = new ArrayList<ScanFilter>();
 
@@ -106,8 +118,13 @@ public class BleScanner {
 
         ScanSettings settings = new
                 ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
+
         setScanning(true);
         scanner.startScan(filters, settings, scan_callback);
+                //handler.postDelayed(this, stop_after_ms);
+           // }
+       // };
+       // handler.post(mTimerGraph);
     }
 
     // Simple method by which scanning can be terminated.

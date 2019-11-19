@@ -1,5 +1,6 @@
 package com.example.rssireader.ui;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
@@ -7,6 +8,8 @@ import android.bluetooth.BluetoothGattService;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,6 +35,10 @@ import java.util.TimerTask;
 
 import com.example.rssireader.bluetooth.BleScanner;
 import com.example.rssireader.bluetooth.ScanResultsConsumer;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GridLabelRenderer;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 
 public class PeripheralControlActivity extends Activity implements ScanResultsConsumer {
@@ -52,6 +59,15 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
     private BleScanner ble_scanner;
     // It's passed but not used by the method in BleScanner at the moment
     private static final long SCAN_TIMEOUT = 5000;
+
+    // GraphView
+    GraphView graph;
+    private final Handler mHandler = new Handler();
+    LineGraphSeries<DataPoint> series;
+    private Runnable mTimerGraph;
+    private double graphLastXValue = 5d;
+
+    final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1234;
 
 
     /*private BleAdapterService bluetooth_le_adapter;
@@ -138,7 +154,7 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
 
         // hide the coloured rectangle used to show green/amber/red rssi
         // distance
-        // It Doesn't nedd to be put invisible because we don't connect to the device anymore
+        // It Doesn't need to be put invisible because we don't connect to the device anymore
         //((LinearLayout) this.findViewById(R.id.rectangle)).setVisibility(View.INVISIBLE);
 
         /*// connect to the Bluetooth adapter service
@@ -148,7 +164,26 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
 
         // RSSI READER
         ble_scanner = new BleScanner(this.getApplicationContext());
+        //ble_scanner.startScanningNoStop(this, device_address, 1000000);
         ble_scanner.startScanningNoStop(this, device_address);
+
+        // Find the graphView
+        graph = (GraphView) findViewById(R.id.graph);
+        // List that will feed the graph
+        series = new LineGraphSeries<>();
+        graph.addSeries(series);
+        // Set the visible portion of the graph's axis X when running
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(40);
+        // set the visible portion of the graph's axis Y when running
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(-80);
+        graph.getViewport().setMaxY(-30);
+
+        //graph.getGridLabelRenderer().setGridStyle(GridLabelRenderer.GridStyle.NONE);// It will remove the background grids
+        //graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);// remove horizontal x labels and line
+        //graph.getGridLabelRenderer().setVerticalLabelsVisible(false);// remove vertical labels and lines
 
 
     }
@@ -166,7 +201,8 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
             @Override
             public void run() {
 
-                ((TextView) findViewById(R.id.rssiTextView)).setText("RSSI = " + Integer.toString(rssi) + " Time = " + timestamp.getTime());
+                // The rectangle is commented so the graph can have more space
+                /*((TextView) findViewById(R.id.rssiTextView)).setText("RSSI = " + Integer.toString(rssi) + " Time = " + timestamp.getTime());
                 LinearLayout layout = ((LinearLayout) PeripheralControlActivity.this
                         .findViewById(R.id.rectangle));
                 byte proximity_band = 3;
@@ -179,7 +215,12 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
                     layout.setBackgroundColor(0xFF00FF00);
                     proximity_band = 1;
                 }
-                layout.invalidate();
+                layout.invalidate();*/
+
+                // Atualiza o X do gráfico
+                graphLastXValue += 1d;
+                series.appendData(new DataPoint(graphLastXValue, rssi), true, 40);
+                //mHandler.postDelayed(this, 200);
             }
         });
     }
@@ -283,4 +324,35 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
         layout.invalidate();
     }*/
 
+    // Take a snapshot of the graph
+    // For now I can't save in the gallery so I only use the takeSnapshotAndShare Method
+    // To share it need to ask the user for permission to access the media directory
+    public void snapshot(View view) {
+        GraphView graph = findViewById(R.id.graph);
+        //Bitmap bitmap = graph.takeSnapshot();
+
+        // It asks the user for permission to access the media directory
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (shouldShowRequestPermissionRationale(
+                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                // Explain to the user why we need to read the contacts
+            }
+
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+
+            // MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE is an
+            // app-defined int constant that should be quite unique
+
+            return;
+        }
+
+        // It takes a snapshot and share it in social media
+        graph.takeSnapshotAndShare(this, "exampleGraph", "GraphViewSnapshot");
+
+        //count += 1;
+    }
 }

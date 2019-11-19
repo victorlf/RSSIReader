@@ -9,7 +9,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
         android:text="name" />
 
     <TextView
@@ -21,7 +20,7 @@
         android:layout_marginTop="16dp"
         android:text="RSSI" />
 
-    <LinearLayout
+    <!--<LinearLayout
         android:id="@+id/rectangle"
         android:layout_width="200dp"
         android:layout_height="60dp"
@@ -31,24 +30,28 @@
         android:background="#FF0000"
         android:orientation="vertical"
         android:padding="10dp" >
-    </LinearLayout>
+    </LinearLayout>-->
 
-    <TextView
-        android:id="@+id/msgTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/connectButton"
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/graph"
+        android:layout_width="match_parent"
+        android:layout_height="200dip"
+        android:layout_below="@+id/rssiTextView"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:text="" />
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp" />
 
     <Button
         android:id="@+id/connectButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="26dp"
-        android:onClick="onConnect"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="50dp"
+        android:onClick="snapshot"
         android:text="Connect" />
 </RelativeLayout>
