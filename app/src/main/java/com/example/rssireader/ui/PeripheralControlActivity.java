@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -185,6 +186,16 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
         //graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);// remove horizontal x labels and line
         //graph.getGridLabelRenderer().setVerticalLabelsVisible(false);// remove vertical labels and lines
 
+        // Banco de Dados
+
+        // Cria BD
+        SQLiteDatabase bancoDados = openOrCreateDatabase("app", MODE_PRIVATE, null);
+        //
+        bancoDados.execSQL("DROP TABLE IF EXISTS rssi");
+        // Cria Tabela
+        bancoDados.execSQL("CREATE TABLE IF NOT EXISTS rssi (id INTEGER PRIMARY KEY AUTOINCREMENT, medida INT(3))");
+        // Inseri dados
+        //bancoDados.execSQL("INSERT INTO rssi(medida) VALUES ('')");
 
     }
 
@@ -221,6 +232,13 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
                 graphLastXValue += 1d;
                 series.appendData(new DataPoint(graphLastXValue, rssi), true, 40);
                 //mHandler.postDelayed(this, 200);
+
+                // Cria BD
+                SQLiteDatabase bancoDados = openOrCreateDatabase("app", MODE_PRIVATE, null);
+                // Cria Tabela
+                //bancoDados.execSQL("CREATE TABLE IF NOT EXISTS rssi (id INTEGER PRIMARY KEY AUTOINCREMENT, medida INT(3))");
+                // Inseri dados
+                bancoDados.execSQL("INSERT INTO rssi(medida) VALUES (" + rssi + ")");
             }
         });
     }
@@ -354,5 +372,11 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
         graph.takeSnapshotAndShare(this, "exampleGraph", "GraphViewSnapshot");
 
         //count += 1;
+    }
+
+    public void plotGraph(View view) {
+        Intent intent = new Intent(PeripheralControlActivity.this,
+                GraphViewActivity.class);
+        startActivity(intent);
     }
 }

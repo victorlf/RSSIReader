@@ -10,8 +10,9 @@ Allows us to determine whether Bluetooth is switched on or off and if we want to
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!-- Is required if we want to scan for other devices. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- Needed to take snapshot-->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
