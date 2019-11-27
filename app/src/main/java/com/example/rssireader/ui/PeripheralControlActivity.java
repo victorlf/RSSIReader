@@ -166,7 +166,7 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
         // RSSI READER
         ble_scanner = new BleScanner(this.getApplicationContext());
         //ble_scanner.startScanningNoStop(this, device_address, 1000000);
-        ble_scanner.startScanningNoStop(this, device_address);
+        ble_scanner.startScanningNoStop(this, device_address, 5000);
 
         // Find the graphView
         graph = (GraphView) findViewById(R.id.graph);
@@ -186,15 +186,15 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
         //graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);// remove horizontal x labels and line
         //graph.getGridLabelRenderer().setVerticalLabelsVisible(false);// remove vertical labels and lines
 
-        // Banco de Dados
+        // Data Base
 
-        // Cria BD
+        // Creates DB
         SQLiteDatabase bancoDados = openOrCreateDatabase("app", MODE_PRIVATE, null);
-        //
+        // Deletes Table
         bancoDados.execSQL("DROP TABLE IF EXISTS rssi");
-        // Cria Tabela
+        // Creates Table
         bancoDados.execSQL("CREATE TABLE IF NOT EXISTS rssi (id INTEGER PRIMARY KEY AUTOINCREMENT, medida INT(3))");
-        // Inseri dados
+        // Inserts data
         //bancoDados.execSQL("INSERT INTO rssi(medida) VALUES ('')");
 
     }
@@ -204,7 +204,7 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
     }
 
     @Override
-    public void candidateBleDevice(BluetoothDevice device, byte[] scan_record, final int rssi) {
+    public void candidateBleDevice(BluetoothDevice device, byte[] scan_record, final int rssi, final int tx_power) {
 
         final Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
@@ -227,6 +227,8 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
                     proximity_band = 1;
                 }
                 layout.invalidate();*/
+
+                ((TextView) findViewById(R.id.rssiTextView)).setText("Tx Power = " + tx_power);
 
                 // Atualiza o X do gráfico
                 graphLastXValue += 1d;

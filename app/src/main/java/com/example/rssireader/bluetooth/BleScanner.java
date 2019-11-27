@@ -89,8 +89,8 @@ public class BleScanner {
 
     // Scanning used in Peripherical Control Activity
     // Here we don't want to stop the scanning adn want to pass a Address for filtering
-    public void startScanningNoStop(final ScanResultsConsumer scan_results_consumer, final String filter_by_bdaddress){//, final long
-            //stop_after_ms ) {
+    public void startScanningNoStop(final ScanResultsConsumer scan_results_consumer, final String filter_by_bdaddress, final long
+            stop_after_ms ) {
 
         //mTimerGraph = new Runnable() {
 
@@ -104,6 +104,17 @@ public class BleScanner {
             scanner = bluetooth_adapter.getBluetoothLeScanner();
             Log.d(Constants.TAG, "Created BluetoothScanner object");
         }
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (scanning) {
+                    Log.d(Constants.TAG, "Stopping scanning");
+                    scanner.stopScan(scan_callback);
+                    setScanning(false);
+                }
+            }
+        }, stop_after_ms);
 
         BleScanner.this.scan_results_consumer = scan_results_consumer;
         Log.d(Constants.TAG, "Scanning");
@@ -142,8 +153,9 @@ public class BleScanner {
             if (!scanning) {
                 return;
             }
+            // getTxPowerLevel returns the transmission power level of the packet in dBm.
             scan_results_consumer.candidateBleDevice(result.getDevice(),
-                    result.getScanRecord().getBytes(), result.getRssi());
+                    result.getScanRecord().getBytes(), result.getRssi(), result.getScanRecord().getTxPowerLevel());
         }
     };
 

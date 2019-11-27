@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.rssireader.R;
@@ -37,6 +38,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class GraphViewActivity extends AppCompatActivity {
@@ -51,6 +54,10 @@ public class GraphViewActivity extends AppCompatActivity {
     private Context context;
 
     final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1234;
+
+    // List for RSSI values to calculate its mode
+    List<Integer> rssi_values = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +102,9 @@ public class GraphViewActivity extends AppCompatActivity {
 
             series.appendData(new DataPoint(id, medida), true, 40);
 
+            // Add to the list of RSSI values to calculate its mode
+            rssi_values.add(medida);
+
             cursor.moveToNext();
         }
 
@@ -108,6 +118,28 @@ public class GraphViewActivity extends AppCompatActivity {
         graph.setBackgroundColor(Color.WHITE);
 
         graph.addSeries(series);
+
+        // Mode of the RSSI values
+        int x  = mode(rssi_values, rssi_values.size());
+
+        // Calculate distance
+        // Total Path Loss = Tx-power less RSSI
+        int l_total = -21 - x;
+        // Depends on the frequency equals 2400MHz
+        double log = Math.log10(2400);
+        double l_d0 = 20*log - 28;
+        // Operations
+        double l_final = l_total - l_d0;
+        // Depends on the same frequency and the environment
+        int n_for_Office = 30;
+        // Operations
+        l_final = l_final/n_for_Office;
+        // Final Operation for distance
+        double distance = Math.pow(10, l_final);
+
+        // Print Total Path Loss and Distance
+        TextView textRssiMode = findViewById(R.id.textRssiMode);
+        textRssiMode.setText("RSSI = " + l_total + " e Distância = " + distance);
 
     }
 
@@ -179,6 +211,26 @@ public class GraphViewActivity extends AppCompatActivity {
         graph.takeSnapshotAndShare(this, "exampleGraph", "GraphViewSnapshot");
         */
     }
+
+    // Mode for the RSSI values
+    static int mode(List<Integer> a,int size) {
+        int maxValue = 0, maxCount = 0, i, j;
+
+        for (i = 0; i < size; ++i) {
+            int count = 0;
+            for (j = 0; j < size; ++j) {
+                if (a.get(j) == a.get(i))
+                    ++count;
+            }
+
+            if (count > maxCount) {
+                maxCount = count;
+                maxValue = a.get(i);
+            }
+        }
+        return maxValue;
+    }
+
 }
 
 

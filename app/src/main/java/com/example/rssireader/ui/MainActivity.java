@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements ScanResultsConsum
     // Any details passed to it by the BleScanner object are stored in the ListAdapter and are
     // shown on the UI if not already there.
     @Override
-    public void candidateBleDevice(final BluetoothDevice device, byte[] scan_record, final int rssi) {
+    public void candidateBleDevice(final BluetoothDevice device, byte[] scan_record, final int rssi, int tx_power) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
