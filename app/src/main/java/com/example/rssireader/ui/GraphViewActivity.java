@@ -213,7 +213,7 @@ public class GraphViewActivity extends AppCompatActivity {
     }
 
     // Mode for the RSSI values
-    static int mode(List<Integer> a,int size) {
+    static int mode(List<Integer> a, int size) {
         int maxValue = 0, maxCount = 0, i, j;
 
         for (i = 0; i < size; ++i) {

@@ -8,10 +8,9 @@ Allows us to determine whether Bluetooth is switched on or off and if we want to
     user to switch it on.
     -->
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!-- Is required if we want to scan for other devices. -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- Needed to take snapshot-->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- Needed to take snapshot -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
 
     <application
@@ -21,6 +20,7 @@ Allows us to determine whether Bluetooth is switched on or off and if we want to
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ui.LocationActivity"></activity>
         <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,17 +31,12 @@ Allows us to determine whether Bluetooth is switched on or off and if we want to
         <activity
             android:name=".ui.PeripheralControlActivity"
             android:label="@string/app_name"
-            android:screenOrientation="landscape"></activity>
-
+            android:screenOrientation="landscape" />
         <activity
-            android:hardwareAccelerated="true"
             android:name=".ui.GraphViewActivity"
+            android:hardwareAccelerated="true"
             android:label="@string/app_name"
-            android:screenOrientation="landscape"></activity>
-
-        <!--<service
-            android:name=".bluetooth.BleAdapterService"
-            android:enabled="true" />-->
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>

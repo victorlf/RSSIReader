@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattService;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
@@ -13,22 +14,33 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
+
 import com.example.rssireader.Constants;
 import com.example.rssireader.R;
 //import com.example.rssireader.bluetooth.BleAdapterService;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Timer;
@@ -70,6 +82,8 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
 
     final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1234;
 
+    // saveDB
+    private String m_Text;
 
     /*private BleAdapterService bluetooth_le_adapter;
 
@@ -380,5 +394,61 @@ public class PeripheralControlActivity extends Activity implements ScanResultsCo
         Intent intent = new Intent(PeripheralControlActivity.this,
                 GraphViewActivity.class);
         startActivity(intent);
+    }
+
+    public void saveDB(View view) {
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setTitle("File Name");
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        dialog.setView(input);
+
+        dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                m_Text = input.getText().toString();
+                System.out.println("Texto inserido: " + m_Text);
+
+                exportDatabase("app", m_Text);
+
+            }
+        });
+
+        dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        dialog.show();
+    }
+
+    public void exportDatabase(String databaseName, String databaseBackupName) {
+        try {
+            //File sd = Environment.getExternalStorageDirectory();
+            File path = new File(Environment.getExternalStorageDirectory(), "MyDirName");
+            File data = Environment.getDataDirectory();
+
+            if (path.canWrite()) {
+                String currentDBPath = "//data//"+getPackageName()+"//databases//"+databaseName+"";
+                String backupDBPath = databaseBackupName + ".db";
+                File currentDB = new File(data, currentDBPath);
+                File backupDB = new File(path, backupDBPath);
+
+                if (currentDB.exists()) {
+                    FileChannel src = new FileInputStream(currentDB).getChannel();
+                    FileChannel dst = new FileOutputStream(backupDB).getChannel();
+                    dst.transferFrom(src, 0, src.size());
+                    src.close();
+                    dst.close();
+                }
+            }
+        } catch (Exception e) {
+
+        }
     }
 }

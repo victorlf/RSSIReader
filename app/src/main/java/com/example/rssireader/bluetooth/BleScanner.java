@@ -30,6 +30,9 @@ public class BleScanner {
     // Graph
     private Runnable mTimerGraph;
 
+    // List of nodes of interest
+    private String[] nodes = {"node1", "node2", "node3", "node4", "node5", "node6"};
+
     // Class Constructor and Checking the Status of the Bluetooth Adapter
     public BleScanner(Context context) {
         this.context = context;
@@ -76,10 +79,10 @@ public class BleScanner {
         List<ScanFilter> filters;
         filters = new ArrayList<ScanFilter>();
         // Creating a filter
-        /*if (filter_by_bdaddress != null && !filter_by_bdaddress.equals("")) {
-            ScanFilter filter = new ScanFilter.Builder().setDeviceAddress(filter_by_bdaddress).build();
+        for (int i=0; i < nodes.length; i++) {
+            ScanFilter filter = new ScanFilter.Builder().setDeviceName(nodes[i]).build();
             filters.add(filter);
-        }*/
+        }
 
         ScanSettings settings = new
                 ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
