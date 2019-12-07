@@ -3,20 +3,25 @@ package com.example.rssireader.ui;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.util.Pools;
 
 import android.Manifest;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,10 +30,21 @@ import com.example.rssireader.Constants;
 import com.example.rssireader.R;
 import com.example.rssireader.bluetooth.BleScanner;
 import com.example.rssireader.bluetooth.ScanResultsConsumer;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class LocationActivity extends AppCompatActivity implements ScanResultsConsumer {
 
@@ -62,7 +78,10 @@ public class LocationActivity extends AppCompatActivity implements ScanResultsCo
     //private String[] nodes = {"node1", "node2", "node3", "node4", "node5", "node6"};
     // Convert String Array to List
     //List<String> nodesList = Arrays.asList(nodes);
-    private List<String> nodesScanned;
+    private List<String> nodesScanned = new ArrayList<String>();
+
+    // saveDB
+    private String m_Text;
 
 
 
@@ -84,10 +103,13 @@ public class LocationActivity extends AppCompatActivity implements ScanResultsCo
         // Creates Table
         //bancoDados.execSQL("CREATE TABLE IF NOT EXISTS rssi (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR, addr VARCHAR, measurement INT(3))");
         bancoDados.execSQL("CREATE TABLE rssi(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR, measurement INT(3))");
-        // Inserts data
-        //bancoDados.execSQL("INSERT INTO rssi(medida) VALUES ('')");
 
+        // Scan for 5 seconds
         onScan(findViewById(R.id.content));
+
+
+        //
+        //select3Nodes(findViewById(R.id.content));
     }
 
     // Any details passed to it by the BleScanner object are stored in the ListAdapter and are
@@ -107,11 +129,12 @@ public class LocationActivity extends AppCompatActivity implements ScanResultsCo
                 SQLiteDatabase bancoDados = openOrCreateDatabase("app", MODE_PRIVATE, null);
                 // Inseri dados
                 //bancoDados.execSQL("INSERT INTO rssi(name, addr, measurement) VALUES (" + device.getName() + ", " + device.getAddress() + ", " + rssi + ")");
-                bancoDados.execSQL("INSERT INTO rssi(name, measurement) VALUES (" + device.getName() + ", " + rssi + ")");
+                String deviceName = device.getName();
+                bancoDados.execSQL("INSERT INTO rssi(name, measurement) VALUES ( '" + deviceName + "', " + rssi + ")");
 
                 //
-                if(!nodesScanned.contains(device.getName())){
-                    nodesScanned.add(device.getName());
+                if(!nodesScanned.contains(deviceName)){
+                    nodesScanned.add(deviceName);
                 }
                 //}
 
@@ -134,6 +157,7 @@ public class LocationActivity extends AppCompatActivity implements ScanResultsCo
         //    toast.cancel();
         //}
         //setScanState(false);
+        select3Nodes(findViewById(R.id.content));
     }
 
     public void onScan(View view) {
@@ -355,6 +379,185 @@ public class LocationActivity extends AppCompatActivity implements ScanResultsCo
             }
         }
         return maxValue;
+    }
+
+    public void saveDB(View view) {
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setTitle("File Name");
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        dialog.setView(input);
+
+        dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                m_Text = input.getText().toString();
+                System.out.println("Texto inserido: " + m_Text);
+
+                exportDatabase("app", m_Text);
+
+            }
+        });
+
+        dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        dialog.show();
+    }
+
+    public void exportDatabase(String databaseName, String databaseBackupName) {
+        try {
+            //File sd = Environment.getExternalStorageDirectory();
+            File path = new File(Environment.getExternalStorageDirectory(), "MyDirName");
+            File data = Environment.getDataDirectory();
+
+            if (path.canWrite()) {
+                String currentDBPath = "//data//"+getPackageName()+"//databases//"+databaseName+"";
+                String backupDBPath = databaseBackupName + ".db";
+                File currentDB = new File(data, currentDBPath);
+                File backupDB = new File(path, backupDBPath);
+
+                if (currentDB.exists()) {
+                    FileChannel src = new FileInputStream(currentDB).getChannel();
+                    FileChannel dst = new FileOutputStream(backupDB).getChannel();
+                    dst.transferFrom(src, 0, src.size());
+                    src.close();
+                    dst.close();
+                }
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    private class Node implements Comparable<Node> {
+        private Integer max_rssi;
+        private String name;
+
+        Node(String name, Integer max_rssi) {
+            this.name = name;
+            this.max_rssi = max_rssi;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public int getMaxRssi() {
+            return max_rssi;
+        }
+
+        @Override
+        public int compareTo(Node o) {
+            //return this.getMaxRssi().compareTo(o.getMaxRssi());
+            return Integer.compare(this.getMaxRssi(), o.getMaxRssi());
+        }
+
+    }
+
+
+    public void select3Nodes(View view) {
+
+        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes_3 = new ArrayList<Node>();
+
+        // Open connaction with DB
+        SQLiteDatabase bancoDados = openOrCreateDatabase("app", MODE_PRIVATE, null);
+
+        // Save every node scanned with its respective max_rssi into list nodes
+        Iterator iter = nodesScanned.iterator();
+        while (iter.hasNext()) {
+            // Recover data
+            String name_temp = iter.next().toString();
+            Cursor cursor = bancoDados.rawQuery("SELECT measurement FROM rssi WHERE name = '" + name_temp + "'", null);
+            int indiceMedida = cursor.getColumnIndex("measurement");
+
+            List<Integer> rssi_values = new ArrayList<>();
+
+            // The cursor is at the last position so we move to next
+            cursor.moveToFirst();
+            while (!cursor.isLast()) {
+                int medida = cursor.getInt(indiceMedida);
+
+                // Add to the list of RSSI values to calculate its mode
+                rssi_values.add(medida);
+
+                System.out.println("Resultado: " + name_temp + "," + medida);
+
+                cursor.moveToNext();
+            }
+
+            // Mode of the RSSI values
+            int max_rssi  = mode(rssi_values, rssi_values.size());
+            //Collections.sort(rssi_values);
+            //int max_rssi = rssi_values.get(rssi_values.size() - 1);
+
+            Node node = new Node(name_temp, max_rssi);
+            nodes.add(node);
+
+        }
+
+        // Sort the list nodes so the Nodes with 3 biggest RSSI will be the last e elements
+        // of the list
+        Collections.sort(nodes);
+
+        System.out.println("node list sorted");
+        Iterator<Node> iter2 = nodes.iterator();
+        while (iter2.hasNext()) {
+            Node n = iter2.next();
+            System.out.println("Resultado Final: " + n.getName() + ", " + n.getMaxRssi());
+        }
+
+        //
+        for (int i = 0; i < 3; i++) {
+            nodes_3.add(nodes.get(nodes.size() - 1));
+            nodes.remove(nodes.size() - 1);
+        }
+
+        String final_measurements = "";
+
+        System.out.println("node_3 : last 3 elements of nodes");
+        Iterator<Node> iter3 = nodes_3.iterator();
+        while (iter3.hasNext()) {
+            Node n = iter3.next();
+            double distance = CalculateDistance(n.getMaxRssi());
+            System.out.println("Resultado Final: " + n.getName() + ", " + n.getMaxRssi() + ", " + distance);
+            final_measurements += n.getName() + ", " + n.getMaxRssi() + ", " + distance + "\n";
+        }
+
+        TextView textMeasurements = findViewById(R.id.textMeasurements);
+        textMeasurements.setText(final_measurements);
+
+    }
+
+    private double CalculateDistance(int max_rssi) {
+        // Calculate distance
+        // Total Path Loss = Tx-power less RSSI
+        int l_total = -21 - max_rssi;
+        // Depends on the frequency equals 2400MHz
+        double log = Math.log10(2400);
+        double l_d0 = 20*log - 28;
+        // Operations
+        double l_final = l_total - l_d0;
+        // Depends on the same frequency and the environment
+        int n_for_Office = 30;
+        // Operations
+        l_final = l_final/n_for_Office;
+        // Final Operation for distance
+        double distance = Math.pow(10, l_final);
+
+        // Print Total Path Loss and Distance
+        //TextView textRssiMode = findViewById(R.id.textRssiMode);
+        //textRssiMode.setText("RSSI = " + l_total + " e Distância = " + distance);
+
+        return distance;
     }
 
 }

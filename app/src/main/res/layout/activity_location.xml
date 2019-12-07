@@ -26,5 +26,31 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingLeft="20dip" />
+        android:paddingLeft="20dip" >
+
+    </ListView>
+
+    <TextView
+        android:id="@+id/textMeasurements"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Final Measurements" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="true"
+        android:gravity="center"
+        android:onClick="saveDB"
+        android:text="Save Section Measurements" />
+
+    <!--<Button
+        android:id="@+id/button3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="true"
+        android:gravity="center"
+        android:onClick="select3Nodes"
+        android:text="Select 3 Nodes" />-->
 </LinearLayout>
