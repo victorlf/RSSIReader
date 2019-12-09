@@ -463,6 +463,8 @@ public class LocationActivity extends AppCompatActivity implements ScanResultsCo
     }
 
 
+
+
     public void select3Nodes(View view) {
 
         List<Node> nodes = new ArrayList<Node>();
@@ -504,7 +506,7 @@ public class LocationActivity extends AppCompatActivity implements ScanResultsCo
 
         }
 
-        // Sort the list nodes so the Nodes with 3 biggest RSSI will be the last e elements
+        // Sort the list nodes so the Nodes with 3 biggest RSSI will be the last elements
         // of the list
         Collections.sort(nodes);
 
@@ -535,6 +537,38 @@ public class LocationActivity extends AppCompatActivity implements ScanResultsCo
         TextView textMeasurements = findViewById(R.id.textMeasurements);
         textMeasurements.setText(final_measurements);
 
+        System.out.println("Calculate the position in the X,Y");
+
+        double r1 = 0;
+        double r2 = 0;
+        double r3 = 0;
+
+        Iterator<Node> iter4 = nodes_3.iterator();
+        while (iter4.hasNext()) {
+            Node n = iter4.next();
+            switch (n.getName()){
+                case "node1":
+                    r1 = CalculateDistance(n.getMaxRssi());
+                    System.out.println("R1 found");
+                case "node2":
+                    r2 = CalculateDistance(n.getMaxRssi());
+                    System.out.println("R2 found");
+                case "node3":
+                    r3 = CalculateDistance(n.getMaxRssi());
+                    System.out.println("R3 found");
+            }
+        }
+
+        CalculatePosition position = new CalculatePosition(4.96, 0, r1, 0, 2.6, r2, 4.332, 4.23, r3);
+
+        double x = position.getX();
+        double y = position.getY();
+
+        System.out.println("The position is (" + x + ", " + y + ")");
+
+        TextView textPosition = findViewById(R.id.textPosition);
+        textPosition.setText("The position is (x = " + x + ", y = " + y + ")");
+
     }
 
     private double CalculateDistance(int max_rssi) {
@@ -558,6 +592,33 @@ public class LocationActivity extends AppCompatActivity implements ScanResultsCo
         //textRssiMode.setText("RSSI = " + l_total + " e Distância = " + distance);
 
         return distance;
+    }
+
+    private class CalculatePosition {
+
+        private double A, B, C, D, E, F;
+
+        public CalculatePosition (double x1, double y1, double r1, double x2, double y2, double r2, double x3, double y3, double r3) {
+
+            this.A = 2*x2 - 2*x1;
+            this.B = 2*y2 - 2*y1;
+            this.C = Math.pow(r1, 2) - Math.pow(r2, 2) - Math.pow(x1, 2) + Math.pow(x2, 2) - Math.pow(y1, 2) + Math.pow(y2, 2);
+            this.D = 2*x3 - 2*x2;
+            this.E = 2*y3 - 2*y2;
+            this.F = Math.pow(r2, 2) - Math.pow(r3, 2) - Math.pow(x2, 2) + Math.pow(x3, 2) - Math.pow(y2, 2) + Math.pow(y3, 2);
+
+        }
+
+        public double getX() {
+            double x = (C*E - F*B) / (E*A - B*D);
+            return x;
+        }
+
+        public double getY() {
+            double y = (C*D - A*F) / (B*D - A*E);
+            return y;
+        }
+
     }
 
 }

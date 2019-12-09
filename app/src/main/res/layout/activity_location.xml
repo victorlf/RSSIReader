@@ -36,6 +36,12 @@
         android:layout_height="wrap_content"
         tools:text="Final Measurements" />
 
+    <TextView
+        android:id="@+id/textPosition"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Final Position" />
+
     <Button
         android:id="@+id/button2"
         android:layout_width="match_parent"
